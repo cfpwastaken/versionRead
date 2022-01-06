@@ -15,53 +15,59 @@ async function getVersions() {
         .map(match => new Version(match[1], match[2], match[3], new Date(match[4])));
 }
 
-function monthsToSVG(dates, year) {
-    let svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100"><line x1="10" x2="200" y1="90" y2="90" stroke="gray" />';
-    let x = 10;
-    let months = [];
-    for (const date of dates) {
-        if(date.getFullYear() == year) months.push(date.getMonth());
-        if(date.getFullYear() == year + 1) months.push(date.getMonth() + 12);
+function getDates(startDate, endDate) {
+    const dates = []
+    let currentDate = startDate
+    const addDays = function (days) {
+        const date = new Date(this.valueOf())
+        date.setDate(date.getDate() + days)
+        return date
     }
-    console.log(months);
-    for (let i = 0; i < 12 * 2; i++) {
-        svg += `<circle cx="${x}" cy="90" r="3"${months.includes(i) ? " stroke='lime'" : " stroke='gray' fill='white'"} />\n`;
-        x += 7;
+    while (currentDate <= endDate) {
+        dates.push(currentDate)
+        currentDate = addDays.call(currentDate, 1)
     }
-    svg += '</svg>';
-    return svg;
+    return dates
 }
 
 function toSVG(versions) {
-    const svg = new svglib.Svg(versions.length * 7 + 10, 100);
-    svg.add(new svglib.Line(10, 70, versions.length * 7 + 10, 70, "gray"));
-    // centered text at the top saying "Spring Boot"
-    svg.add(new svglib.Text(10, 90, "Spring Boot Version History, scraped at " + new Date().toLocaleString()));
-    // for every version
     let x = 10;
     let verBeginX = 0;
     let verY = 70;
     let verLineSize = 0;
     let lastMajor = -1;
     let lastMinor = -1;
-    for (let i = 0; i < versions.length; i++) {
-        const version = versions[i];
-        // add a circle, color it green if it's a major version
-        svg.add(new svglib.Circle(x, 70, 3, version.major > lastMajor ? "lime" : version.minor > lastMinor ? "orange" : "gray", version.major ? "white" : "gray"));
-        if(version.major > lastMajor) {
-            svg.add(new svglib.Line(verBeginX, verY, verBeginX + verLineSize, verY, "gray"));
-            svg.add(new svglib.Text(verBeginX + verLineSize + 5, verY - 30, version.major.toString(), "gray"));
-            verBeginX = x;
-            verY -= 20;
+    const lastDate = versions[versions.length - 1].date;
+    const firstDate = versions[0].date;
+    const dates = getDates(firstDate, lastDate);
+    const svg = new svglib.Svg(dates.length * 7 + 10, 100);
+    svg.add(new svglib.Line(10, 70, dates.length * 7 + 10, 70, "gray"));
+    svg.add(new svglib.Text(10, 90, "Spring Boot Version History, scraped at " + new Date().toLocaleString()));
+
+    dates.forEach(date => {
+        const version = versions.find(v => v.date.getDay() == date.getDay() && v.date.getMonth() == date.getMonth() && v.date.getFullYear() == date.getFullYear());
+        if(version != null) {
+            console.log("Found version " + version.toString() + " at " + date.toLocaleString());
+            svg.add(new svglib.Circle(x, 70, 3, version.major > lastMajor ? "lime" : version.minor > lastMinor ? "orange" : "blue", version.major ? "white" : "gray"));
+            
+            if(version.major > lastMajor) {
+                svg.add(new svglib.Line(verBeginX, verY, verBeginX + verLineSize, verY, "gray"));
+                svg.add(new svglib.Text(verBeginX + verLineSize + 5, verY - 30, version.major.toString(), "gray"));
+                verBeginX = x;
+                verY -= 20;
+            }
+            lastMajor = version.major;
+            lastMinor = version.minor;
+            x += 7;
+            verLineSize += 7;
+        } else {
+            console.log("No version found at " + date.toLocaleString());
+            svg.add(new svglib.Circle(x, 70, 3, "gray", "white"));
+            x += 7;
+            verLineSize += 7;
         }
-        lastMajor = version.major;
-        lastMinor = version.minor;
-        x += 7;
-        verLineSize += 7;
-    }
-    x -= 7;
-    verLineSize -= 7;
-    svg.add(new svglib.Line(verBeginX, verY, verBeginX + verLineSize, verY, "gray"));
+    });
+    console.log(lastMajor);
     return svg.get();
 }
 
