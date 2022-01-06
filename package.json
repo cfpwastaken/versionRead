@@ -1,0 +1,21 @@
+{
+  "name": "versionread",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.10",
+    "debug": "^4.3.3",
+    "node-fetch": "^3.1.0",
+    "request": "^2.88.2",
+    "request-cloudflare": "^2.0.0",
+    "request-promise": "^4.2.6"
+  }
+}

@@ -1,0 +1,9 @@
+node_modules
+.pmignore
+clean.js
+main.min.js
+pm.json
+test.js
+test.min.js
+test.svg
+data
