@@ -43,16 +43,15 @@ function toSVG(versions) {
     const lastDate = versions[versions.length - 1].date;
     const firstDate = versions[0].date;
     const dates = getDates(firstDate, lastDate);
-    const svg = new svglib.Svg(dates.length * 15 / 30 + 15, 100);
-    svg.add(new svglib.Line(10, 70, dates.length * 15 / 30 + 10, 70, "gray"));
-    svg.add(new svglib.Text(10, 90, "Spring Boot Version History, scraped at " + new Date().toLocaleString()));
-
+    const svg = new svglib.Svg(dates.length * 10 / 30 + 10, 100);
+    svg.add(new svglib.Line(10, 70, dates.length * 10 / 30 + 10, 70, "black"));
+    // svg.add(new svglib.Text(10, 90, "Spring Boot Version History, scraped at " + new Date().toLocaleString()));
     for(let i = 0; i < dates.length; i += 30) {
         const date = dates[i];
         const version = versions.find(v => v.date.getDay() == date.getDay() && v.date.getMonth() == date.getMonth() && v.date.getFullYear() == date.getFullYear());
         if(version != null) {
             console.log("Found version " + version.toString() + " at " + date.toLocaleString());
-            svg.add(new svglib.Circle(x, 70, 3, "gray", "white"));
+            svg.add(new svglib.Circle(x, 70, 3, "white", "black"));
 
             if(version.major > lastMajor) {
                 //svg.add(new svglib.Line(verBeginX, verY, verBeginX + verLineSize, verY, "gray"));
@@ -63,21 +62,21 @@ function toSVG(versions) {
                 currentColor++;
                 svg.add(new svglib.Circle(x, verY, 3, colors[currentColor], "white"));
             } else {
-                // only run if minor changed
-                if(version.minor > lastMinor) {
-                    svg.add(new svglib.Circle(x, verY, 3, colors[currentColor], "white"));
-                    svg.add(new svglib.Text(x - 10, verY - 15, version.major + "." + version.minor, "gray"));
-                }
+            }
+            // only run if minor changed
+            if(version.minor > lastMinor && version.major == lastMajor) {
+                svg.add(new svglib.Circle(x, verY, 3, colors[currentColor], "white"));
+                svg.add(new svglib.Text(x - 10, verY - 15, version.major + "." + version.minor, "gray"));
             }
             lastMajor = version.major;
             lastMinor = version.minor;
-            x += 15;
+            x += 10;
             verLineSize += 7;
         } else {
             console.log("No version found at " + date.toLocaleString());
             //svg.add(new svglib.Circle(x, verY, 3, "gray", "white"));
-            svg.add(new svglib.Circle(x, 70, 3, "gray", "white"));
-            x += 15;
+            svg.add(new svglib.Circle(x, 70, 3, "white", "black"));
+            x += 10;
             verLineSize += 7;
         }
     }
