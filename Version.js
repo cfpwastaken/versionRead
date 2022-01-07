@@ -12,6 +12,6 @@ export default class Version {
     }
 
     toString() {
-        return "gdfgdgf";
+        return this.major + "." + this.minor + "." + this.patch;
     }
 }
