@@ -72,7 +72,6 @@ function toSVG(versions) {
             // draw a line to the circle
         }
         x += X_STEP;
-        verLineSize += 7;
     }
     for (const version of versions) {
         // only if major or minor changed
