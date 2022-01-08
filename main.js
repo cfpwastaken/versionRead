@@ -44,12 +44,12 @@ function toSVG(versions) {
     const lastDate = versions[versions.length - 1].date;
     const datesInBetween = between(firstDate, lastDate);
     const TOTAL_SVG_WIDTH = datesInBetween.length * X_STEP / 30 + 10;
-    const svg = new svglib.Svg(TOTAL_SVG_WIDTH + X_STEP, SVG_HEIGHT);
+    const svg = new svglib.Svg(TOTAL_SVG_WIDTH + X_STEP + 10, SVG_HEIGHT);
     let verY = 50;
     let lastMajor = 1;
     let lastMinor = -1;
     let lastYear = -1;
-    svg.add(new svglib.Line(10, 70, TOTAL_SVG_WIDTH, 70, SHAPE_COLOR));
+    svg.add(new svglib.Line(10, 70, TOTAL_SVG_WIDTH + 10, 70, SHAPE_COLOR));
 
     let x = X_STEP;
     svg.add(new svglib.Circle(x, 70, 3, "white", SHAPE_COLOR));
@@ -79,15 +79,15 @@ function toSVG(versions) {
             // find the date index of the version and draw a circle
             const dateIndex = datesInBetween.findIndex(date => date.getDay() == version.date.getDay() && date.getMonth() == version.date.getMonth() && date.getFullYear() == version.date.getFullYear());
             if (dateIndex == -1) { if (VERBOSE) { console.error("NO DATE INDEX"); } continue; }
-            const x = dateIndex * X_STEP / 30 + 10 + 10;
-            svg.add(new svglib.Circle(x, verY, 5, COLORS[currentColor], "white"));
-            // draw the version number
-            svg.add(new svglib.Text(x - X_STEP, verY - 15, version.major + "." + version.minor, FONT));
+            const x = dateIndex * X_STEP / 30 + 15;
             // if major version changed, change the verY position by 20 and change the currentColor by 1
             if (version.major != lastMajor) {
                 verY -= 20;
                 currentColor++;
             }
+            svg.add(new svglib.Circle(x, verY, 5, COLORS[currentColor], "white"));
+            // draw the version number
+            svg.add(new svglib.Text(x - X_STEP, verY - 15, version.major + "." + version.minor, FONT));
             lastMajor = version.major;
             lastMinor = version.minor;
         } else {
