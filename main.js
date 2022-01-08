@@ -33,69 +33,72 @@ function getDates(startDate, endDate) {
 const colors = ["red", "green", "blue", "orange", "yellow", "purple", "pink", "brown", "gray", "lime", "cyan", "magenta", "black"];
 let currentColor = 0;
 
+const FONT = process.argv[2] || "Arial";
+const X_OFFSET = 10;
+
 function toSVG(versions) {
-    let x = 10;
-    let verBeginX = 0;
-    let verY = 70;
-    let verLineSize = 0;
-    let lastMajor = -1;
-    let lastMinor = -1;
     const lastDate = versions[versions.length - 1].date;
     const firstDate = versions[0].date;
     const dates = getDates(firstDate, lastDate);
-    const svg = new svglib.Svg(dates.length * 10 / 30 + 10, 100);
-    svg.add(new svglib.Line(10, 70, dates.length * 10 / 30 + 10, 70, "black"));
-    // svg.add(new svglib.Text(10, 90, "Spring Boot Version History, scraped at " + new Date().toLocaleString()));
-    for(let i = 0; i < dates.length; i += 30) {
+    const SVG_WIDTH = dates.length * 10 / 30 + 10;
+    const svg = new svglib.Svg(SVG_WIDTH + 10, 100);
+    let x = 10;
+    let verBeginX = 0;
+    let verY = 50;
+    let verLineSize = 0;
+    let lastMajor = 1;
+    let lastMinor = -1;
+    let shouldDrawDate = 1;
+    let lastYear = -1;
+    svg.add(new svglib.Line(10, 70, SVG_WIDTH, 70, "gray"));
+    svg.add(new svglib.Circle(x, 70, 3, "white", "gray"));
+    x += X_OFFSET;
+    for(let i = 0; i < dates.length; i += 30) { // muss eine fori schleife sein wegen i += 30
         const date = dates[i];
-        const version = versions.find(v => v.date.getDay() == date.getDay() && v.date.getMonth() == date.getMonth() && v.date.getFullYear() == date.getFullYear());
-        if(version != null) {
-            console.log("Found version " + version.toString() + " at " + date.toLocaleString());
-            svg.add(new svglib.Circle(x, 70, 3, "white", "black"));
-
-            if(version.major > lastMajor) {
-                //svg.add(new svglib.Line(verBeginX, verY, verBeginX + verLineSize, verY, "gray"));
-                svg.add(new svglib.Text(verBeginX + verLineSize + 5, verY - 30, version.major + ".0", "gray"));
-                verBeginX = x;
-                verY -= 20;
-                verLineSize = 0;-
-                currentColor++;
-                svg.add(new svglib.Circle(x, verY, 3, colors[currentColor], "white"));
+        //svg.add(new svglib.Circle(x, verY, 3, "gray", "white"));
+        svg.add(new svglib.Circle(x, 70, 3, "white", "gray"));
+        // add date text at the bottom of the circle
+        if(date.getFullYear() != lastYear) {
+            if(i == 0) {
+                svg.add(new svglib.Text(x - 15, 90 + 7, date.getFullYear(), FONT));
+                svg.add(new svglib.Line(x - X_OFFSET, 80, x - X_OFFSET, 73, "gray"));
             } else {
+                svg.add(new svglib.Text(x - 16, 90 + 7, date.getFullYear(), FONT));
+                svg.add(new svglib.Line(x, 80, x, 73, "gray"));
             }
-            // only run if minor changed
-            if(version.minor > lastMinor && version.major == lastMajor) {
-                svg.add(new svglib.Circle(x, verY, 3, colors[currentColor], "white"));
-                svg.add(new svglib.Text(x - 10, verY - 15, version.major + "." + version.minor, "gray"));
+            lastYear = date.getFullYear();
+            // draw a line to the circle
+        }
+        x += X_OFFSET;
+        verLineSize += 7;
+    }
+    for (const version of versions) {
+        // only if major or minor changed
+        if(version.major != lastMajor || version.minor != lastMinor) {
+            // find the date index of the version and draw a circle
+            const dateIndex = dates.findIndex(date => date.getDay() == version.date.getDay() && date.getMonth() == version.date.getMonth() && date.getFullYear() == version.date.getFullYear());
+            if (dateIndex == -1) { console.error("NO DATE INDEX"); continue; }
+            const x = dateIndex * X_OFFSET / 30 + 10 + 10;
+            svg.add(new svglib.Circle(x, verY, 5, colors[currentColor], "white"));
+            // draw the version number
+            svg.add(new svglib.Text(x - X_OFFSET, verY - 15, version.major + "." + version.minor, FONT));
+            // if major version changed, change the verY position by 20 and change the currentColor by 1
+            if(version.major != lastMajor) {
+                verY -= 20;
+                currentColor++;
             }
-            lastMajor = version.major;
+            lastMajor= version.major;
             lastMinor = version.minor;
-            x += 10;
-            verLineSize += 7;
         } else {
-            console.log("No version found at " + date.toLocaleString());
-            //svg.add(new svglib.Circle(x, verY, 3, "gray", "white"));
-            svg.add(new svglib.Circle(x, 70, 3, "white", "black"));
-            x += 10;
-            verLineSize += 7;
+            console.log("SAME VERSION");
         }
     }
-    console.log(lastMajor);
     return svg.get();
 }
 
 async function run() {
     const versions = await getVersions();
     console.log(versions);
-    // let dates = [];
-    // let oldMinor = -1;
-    // let oldMajor = -1;
-    // for (let i = 0; i < versions.length; i++) {
-    //     const version = versions[i];
-    //     if(version.minor != oldMinor) dates.push(version.date);
-    //     oldMinor = version.minor;
-    // }
-    // fs.writeFileSync("result.svg", monthsToSVG(dates, 2019));
     fs.writeFileSync("result.svg", toSVG(versions));
 }
 
