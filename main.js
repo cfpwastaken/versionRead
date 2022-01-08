@@ -4,7 +4,7 @@ import fs from "fs";
 import * as svglib from "svglib";
 
 const URL = "https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter/";
-
+const VERBOSE = process.argv.includes("-v");
 const regex = /(\d+).(\d+).(\d+).*(\d{4}-\d{2}-\d{2})/;
 
 async function getVersions() {
@@ -30,11 +30,14 @@ function getDates(startDate, endDate) {
     return dates
 }
 
+function termArg(arg, def) {
+    return process.argv.includes("--" + arg) ? process.argv[process.argv.indexOf("--" + arg) + 1] : def;
+}
+
 const colors = ["red", "green", "blue", "orange", "yellow", "purple", "pink", "brown", "gray", "lime", "cyan", "magenta", "black"];
 let currentColor = 0;
-
-const FONT = process.argv[2] || "Arial";
-const X_OFFSET = 10;
+const FONT = termArg("font", "Arial");
+const X_OFFSET = termArg("xOffset", 10);
 
 function toSVG(versions) {
     const lastDate = versions[versions.length - 1].date;
@@ -77,7 +80,7 @@ function toSVG(versions) {
         if(version.major != lastMajor || version.minor != lastMinor) {
             // find the date index of the version and draw a circle
             const dateIndex = dates.findIndex(date => date.getDay() == version.date.getDay() && date.getMonth() == version.date.getMonth() && date.getFullYear() == version.date.getFullYear());
-            if (dateIndex == -1) { console.error("NO DATE INDEX"); continue; }
+            if (dateIndex == -1) { if(VERBOSE) { console.error("NO DATE INDEX"); } continue; }
             const x = dateIndex * X_OFFSET / 30 + 10 + 10;
             svg.add(new svglib.Circle(x, verY, 5, colors[currentColor], "white"));
             // draw the version number
@@ -90,7 +93,7 @@ function toSVG(versions) {
             lastMajor= version.major;
             lastMinor = version.minor;
         } else {
-            console.log("SAME VERSION");
+            if(VERBOSE) console.log("SAME VERSION");
         }
     }
     return svg.get();
