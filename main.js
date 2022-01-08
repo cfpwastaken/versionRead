@@ -34,7 +34,7 @@ function termArg(arg, def) {
     return process.argv.includes("--" + arg) ? process.argv[process.argv.indexOf("--" + arg) + 1] : def;
 }
 
-const colors = ["red", "green", "blue", "orange", "yellow", "purple", "pink", "brown", "gray", "lime", "cyan", "magenta", "black"];
+const COLORS = ["red", "green", "blue", "orange", "yellow", "purple", "pink", "brown", "gray", "lime", "cyan", "magenta", "black"];
 let currentColor = 0;
 const FONT = termArg("font", "Arial");
 const X_OFFSET = termArg("xOffset", 10);
@@ -43,9 +43,9 @@ function toSVG(versions) {
     const lastDate = versions[versions.length - 1].date;
     const firstDate = versions[0].date;
     const dates = getDates(firstDate, lastDate);
-    const SVG_WIDTH = dates.length * 10 / 30 + 10;
-    const svg = new svglib.Svg(SVG_WIDTH + 10, 100);
-    let x = 10;
+    const SVG_WIDTH = dates.length * X_OFFSET / 30 + 10;
+    const svg = new svglib.Svg(SVG_WIDTH + X_OFFSET, 100);
+    let x = X_OFFSET;
     let verBeginX = 0;
     let verY = 50;
     let verLineSize = 0;
@@ -82,7 +82,7 @@ function toSVG(versions) {
             const dateIndex = dates.findIndex(date => date.getDay() == version.date.getDay() && date.getMonth() == version.date.getMonth() && date.getFullYear() == version.date.getFullYear());
             if (dateIndex == -1) { if(VERBOSE) { console.error("NO DATE INDEX"); } continue; }
             const x = dateIndex * X_OFFSET / 30 + 10 + 10;
-            svg.add(new svglib.Circle(x, verY, 5, colors[currentColor], "white"));
+            svg.add(new svglib.Circle(x, verY, 5, COLORS[currentColor], "white"));
             // draw the version number
             svg.add(new svglib.Text(x - X_OFFSET, verY - 15, version.major + "." + version.minor, FONT));
             // if major version changed, change the verY position by 20 and change the currentColor by 1
