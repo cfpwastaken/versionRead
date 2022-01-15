@@ -41,8 +41,7 @@ const versionNumberRegex = /(\d+).(\d+).(\d+).*(\d{4}-\d{2}-\d{2})/;
 
 function toSVG(versions) {
     const firstDate = versions[0].date;
-    const lastDate = versions[versions.length - 1].date;
-    const datesInBetween = between(firstDate, lastDate);
+    const datesInBetween = between(firstDate, new Date());
     const TOTAL_SVG_WIDTH = datesInBetween.length * X_STEP / 30 + 10;
     const svg = new svglib.Svg(TOTAL_SVG_WIDTH + X_STEP + 10, SVG_HEIGHT);
     let verY = 50;
@@ -55,11 +54,9 @@ function toSVG(versions) {
     svg.add(new svglib.Circle(x, 70, 3, "white", SHAPE_COLOR));
 
     x += X_STEP;
-    for (let i = 0; i < datesInBetween.length; i += 30) {
+    for (let i = 0; i < datesInBetween.length; i += 31) {
         const date = datesInBetween[i];
-        //svg.add(new svglib.Circle(x, verY, 3, "gray", "white"));
         svg.add(new svglib.Circle(x, 70, 3, "white", SHAPE_COLOR));
-        // add date text at the bottom of the circle
         if (date.getFullYear() != lastYear) {
             if (i == 0) {
                 svg.add(new svglib.Text(x - 15, 90 + 7, date.getFullYear(), FONT));
@@ -69,31 +66,52 @@ function toSVG(versions) {
                 svg.add(new svglib.Line(x, 80, x, 73, "gray"));
             }
             lastYear = date.getFullYear();
-            // draw a line to the circle
         }
         x += X_STEP;
     }
+    svg.add(new svglib.Line(x, 80, x, 73, "gray"));
+    svg.add(new svglib.Text(x - 16, 90 + 7, new Date().getFullYear(), FONT));
+    for(let i = 0; i < 4; i++) {
+        svg.add(new svglib.Circle(x, 70, 3, "white", SHAPE_COLOR));
+        x += X_STEP;
+    }
+    x = X_STEP;
+    let startX = x + 5;
+    let draw = [];
+    const majorChanged = (x) => {
+        verY -= 20;
+        svg.add(new svglib.Rectangle(startX + 4, verY + 10, x - 12, 20, COLORS[currentColor % COLORS.length]));
+        svg.add(new svglib.Circle(startX + 3, verY + 20, 10, COLORS[currentColor]));
+        svg.add(new svglib.Circle(x + 6, verY + 20, 10, COLORS[currentColor]));
+        startX = x;
+        currentColor++;
+        for(const add of draw) {
+            svg.add(add);
+        }
+        draw = [];
+    }
+    let xOfLastVersion = 0;
     for (const version of versions) {
-        // only if major or minor changed
         if (version.major != lastMajor || version.minor != lastMinor) {
-            // find the date index of the version and draw a circle
-            const dateIndex = datesInBetween.findIndex(date => date.getDay() == version.date.getDay() && date.getMonth() == version.date.getMonth() && date.getFullYear() == version.date.getFullYear());
-            if (dateIndex == -1) { if (VERBOSE) { console.error("NO DATE INDEX"); } continue; }
-            const x = dateIndex * X_STEP / 30 + 15;
-            // if major version changed, change the verY position by 20 and change the currentColor by 1
-            if (version.major != lastMajor) {
-                verY -= 20;
-                currentColor++;
+            const months = (version.date.getMonth() - firstDate.getMonth()) + (version.date.getFullYear() - firstDate.getFullYear()) * 12;
+            const x = months * X_STEP + 15;
+            console.log(months);
+            if (versions[versions.indexOf(version) + 1] && versions[versions.indexOf(version) + 1].major != lastMajor) {
+                majorChanged(xOfLastVersion);
             }
-            svg.add(new svglib.Circle(x, verY, 5, COLORS[currentColor], "white"));
-            // draw the version number
-            svg.add(new svglib.Text(x - X_STEP, verY - 15, version.major + "." + version.minor, FONT));
+            if(version.major != lastMajor) {
+                startX = x;
+            }
+            xOfLastVersion = x;
+            draw.push(new svglib.Circle(x + 5, verY, 5, "white", SHAPE_COLOR));
+            svg.add(new svglib.Text(x - X_STEP + 5, verY - 15, version.major + "." + version.minor, FONT));
             lastMajor = version.major;
             lastMinor = version.minor;
         } else {
             if (VERBOSE) console.log("SAME VERSION");
         }
     }
+    majorChanged(TOTAL_SVG_WIDTH)
     return svg.get();
 }
 
