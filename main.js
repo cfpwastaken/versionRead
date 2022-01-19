@@ -94,24 +94,21 @@ function toSVG(versions) {
     }
     let xOfLastVersion = 0;
     for (const version of versions) {
-        if (version.major != lastMajor || version.minor != lastMinor) {
-            const months = (version.date.getMonth() - firstDate.getMonth()) + (version.date.getFullYear() - firstDate.getFullYear()) * 12;
-            const x = months * X_STEP + 15;
-            console.log(months);
-            if (versions[versions.indexOf(version) + 1] && versions[versions.indexOf(version) + 1].major != lastMajor) {
-                majorChanged(xOfLastVersion);
-            }
-            if(version.major != lastMajor) {
-                startX = x;
-            }
-            xOfLastVersion = x;
+        const months = (version.date.getMonth() - firstDate.getMonth()) + (version.date.getFullYear() - firstDate.getFullYear()) * 12;
+        const x = months * X_STEP + 15;
+        if (version.major != lastMajor) {
+            majorChanged(xOfLastVersion);
+            startX = x;
+        }
+        xOfLastVersion = x;
+        if(version.minor != lastMinor) {
             draw.push(new svglib.Circle(x + 5, verY, 5, "white", SHAPE_COLOR));
             svg.add(new svglib.Text(x - X_STEP + 5, verY - 15, version.major + "." + version.minor, FONT));
-            lastMajor = version.major;
-            lastMinor = version.minor;
         } else {
-            if (VERBOSE) console.log("SAME VERSION");
+            draw.push(new svglib.Circle(x + 5, verY, 2, "white", SHAPE_COLOR));
         }
+        lastMajor = version.major;
+        lastMinor = version.minor;
     }
     majorChanged(TOTAL_SVG_WIDTH)
     return svg.get();
