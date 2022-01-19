@@ -80,9 +80,11 @@ function toSVG(versions) {
     let draw = [];
     const majorChanged = (x) => {
         verY -= 20;
-        svg.add(new svglib.Rectangle(startX + 4, verY + 10, x - 12, 20, COLORS[currentColor % COLORS.length]));
-        svg.add(new svglib.Circle(startX + 3, verY + 20, 10, COLORS[currentColor]));
-        svg.add(new svglib.Circle(x + 6, verY + 20, 10, COLORS[currentColor]));
+        // svg.add(new svglib.Rectangle(startX + 4, verY + 10, x - 12, 20, COLORS[currentColor % COLORS.length]));
+        // svg.add(new svglib.Circle(startX + 3, verY + 20, 10, COLORS[currentColor]));
+        // svg.add(new svglib.Circle(x + 6, verY + 20, 10, COLORS[currentColor]));
+        // make a rounded line that is very thick
+        svg.add(new svglib.RoundedLine(startX + 4, verY + 20, x + 5, verY + 20, COLORS[currentColor % COLORS.length]));
         startX = x;
         currentColor++;
         for(const add of draw) {
