@@ -39,21 +39,7 @@ function between(startDate, endDate) {
 let currentColor = 0;
 const versionNumberRegex = /(\d+).(\d+).(\d+).*(\d{4}-\d{2}-\d{2})/;
 
-function toSVG(versions) {
-    const firstDate = versions[0].date;
-    const datesInBetween = between(firstDate, new Date());
-    const TOTAL_SVG_WIDTH = datesInBetween.length * X_STEP / 30 + 10;
-    const svg = new svglib.Svg(TOTAL_SVG_WIDTH + X_STEP + 10, SVG_HEIGHT);
-    let verY = 50;
-    let lastMajor = 1;
-    let lastMinor = -1;
-    let lastYear = -1;
-    svg.add(new svglib.Line(10, 70, TOTAL_SVG_WIDTH + 10, 70, SHAPE_COLOR));
-
-    let x = X_STEP;
-    svg.add(new svglib.Circle(x, 70, 3, "white", SHAPE_COLOR));
-
-    x += X_STEP;
+function drawSVGdates(datesInBetween, svg, x, lastYear) {
     for (let i = 0; i < datesInBetween.length; i += 31) {
         const date = datesInBetween[i];
         svg.add(new svglib.Circle(x, 70, 3, "white", SHAPE_COLOR));
@@ -69,12 +55,30 @@ function toSVG(versions) {
         }
         x += X_STEP;
     }
-    svg.add(new svglib.Line(x, 80, x, 73, "gray"));
-    svg.add(new svglib.Text(x - 16, 90 + 7, new Date().getFullYear(), FONT));
-    for(let i = 0; i < 4; i++) {
+    // svg.add(new svglib.Line(x, 80, x, 73, "gray"));
+    // svg.add(new svglib.Text(x - 16, 90 + 7, new Date().getFullYear(), FONT));
+    for(let i = 0; i < 3; i++) {
         svg.add(new svglib.Circle(x, 70, 3, "white", SHAPE_COLOR));
         x += X_STEP;
     }
+}
+
+function toSVG(versions) {
+    const firstDate = versions[0].date;
+    const datesInBetween = between(firstDate, new Date());
+    const TOTAL_SVG_WIDTH = datesInBetween.length * X_STEP / 30 + 10;
+    const svg = new svglib.Svg(TOTAL_SVG_WIDTH - 7 + X_STEP + 10, SVG_HEIGHT);
+    let verY = 50;
+    let lastMajor = 1;
+    let lastMinor = -1;
+    let lastYear = -1;
+    svg.add(new svglib.Line(10, 70, TOTAL_SVG_WIDTH + 10, 70, SHAPE_COLOR));
+
+    let x = X_STEP;
+    svg.add(new svglib.Circle(x, 70, 3, "white", SHAPE_COLOR));
+
+    x += X_STEP;
+    drawSVGdates(datesInBetween, svg, x, lastYear);
     x = X_STEP;
     let startX = x + 5;
     let draw = [];
@@ -84,7 +88,7 @@ function toSVG(versions) {
         // svg.add(new svglib.Circle(startX + 3, verY + 20, 10, COLORS[currentColor]));
         // svg.add(new svglib.Circle(x + 6, verY + 20, 10, COLORS[currentColor]));
         // make a rounded line that is very thick
-        svg.add(new svglib.RoundedLine(startX + 4, verY + 20, x + 5, verY + 20, COLORS[currentColor % COLORS.length]));
+        svg.add(new svglib.RoundedLine(startX + 4, verY + 20, x + 25, verY + 20, COLORS[currentColor % COLORS.length]));
         startX = x;
         currentColor++;
         for(const add of draw) {
