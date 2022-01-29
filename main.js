@@ -63,23 +63,7 @@ function drawSVGdates(datesInBetween, svg, x, lastYear) {
     }
 }
 
-function toSVG(versions) {
-    const firstDate = versions[0].date;
-    const datesInBetween = between(firstDate, new Date());
-    const TOTAL_SVG_WIDTH = datesInBetween.length * X_STEP / 30 + 10;
-    const svg = new svglib.Svg(TOTAL_SVG_WIDTH - 7 + X_STEP + 10, SVG_HEIGHT);
-    let verY = 50;
-    let lastMajor = 1;
-    let lastMinor = -1;
-    let lastYear = -1;
-    svg.add(new svglib.Line(10, 70, TOTAL_SVG_WIDTH + 10, 70, SHAPE_COLOR));
-
-    let x = X_STEP;
-    svg.add(new svglib.Circle(x, 70, 3, "white", SHAPE_COLOR));
-
-    x += X_STEP;
-    drawSVGdates(datesInBetween, svg, x, lastYear);
-    x = X_STEP;
+function drawSVGVersions(x, versions, firstDate, lastMajor, lastMinor, verY, svg, TOTAL_SVG_WIDTH) {
     let startX = x + 5;
     let draw = [];
     const majorChanged = (x) => {
@@ -115,6 +99,26 @@ function toSVG(versions) {
         lastMinor = version.minor;
     }
     majorChanged(TOTAL_SVG_WIDTH)
+}
+
+function toSVG(versions) {
+    const firstDate = versions[0].date;
+    const datesInBetween = between(firstDate, new Date());
+    const TOTAL_SVG_WIDTH = datesInBetween.length * X_STEP / 30 + 10;
+    const svg = new svglib.Svg(TOTAL_SVG_WIDTH - 7 + X_STEP + 10, SVG_HEIGHT);
+    let verY = 50;
+    let lastMajor = 1;
+    let lastMinor = -1;
+    let lastYear = -1;
+    svg.add(new svglib.Line(10, 70, TOTAL_SVG_WIDTH + 10, 70, SHAPE_COLOR));
+
+    let x = X_STEP;
+    svg.add(new svglib.Circle(x, 70, 3, "white", SHAPE_COLOR));
+
+    x += X_STEP;
+    drawSVGdates(datesInBetween, svg, x, lastYear);
+    x = X_STEP;
+    drawSVGVersions(x, versions, firstDate, lastMajor, lastMinor, verY, svg, TOTAL_SVG_WIDTH);
     return svg.get();
 }
 
