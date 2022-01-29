@@ -1,10 +1,10 @@
 export default class Version { 
-    major;
-    minor;
-    patch;
-    date;
+    major: number;
+    minor: number;
+    patch: number;
+    date: Date;
 
-    constructor(major, minor, patch, date) {
+    constructor(major: number, minor: number, patch: number, date: Date) {
         this.major = major;
         this.minor = minor;
         this.patch = patch;

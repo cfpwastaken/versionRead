@@ -3,8 +3,7 @@ import Version from "./Version.js";
 import fs from "fs";
 import * as svglib from "svglib";
 
-const URL = "https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter/";
-const VERBOSE = false;
+const URL: string = "https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter/";
 
 const COLORS = ["firebrick", "forestgreen"];
 const FONT = "Arial"
@@ -17,10 +16,10 @@ async function getVersions() {
     return result.split("\n")
         .map(line => line.match(versionNumberRegex))
         .filter(match => match != null)
-        .map(match => new Version(match[1], match[2], match[3], new Date(match[4])));
+        .map(match => new Version(parseInt(match[1]), parseInt(match[2]), parseInt(match[3]), new Date(match[4])));
 }
 
-function between(startDate, endDate) {
+function between(startDate: Date, endDate: Date) {
     const dates = []
     let currentDate = startDate
     const addOneDay = function () {
@@ -39,16 +38,16 @@ function between(startDate, endDate) {
 let currentColor = 0;
 const versionNumberRegex = /(\d+).(\d+).(\d+).*(\d{4}-\d{2}-\d{2})/;
 
-function drawSVGdates(datesInBetween, svg, x, lastYear) {
+function drawSVGdates(datesInBetween: Date[], svg: svglib.Svg, x: number, lastYear: number) {
     for (let i = 0; i < datesInBetween.length; i += 31) {
         const date = datesInBetween[i];
         svg.add(new svglib.Circle(x, 70, 3, "white", SHAPE_COLOR));
         if (date.getFullYear() != lastYear) {
             if (i == 0) {
-                svg.add(new svglib.Text(x - 15, 90 + 7, date.getFullYear(), FONT));
+                svg.add(new svglib.Text(x - 15, 90 + 7, "" + date.getFullYear(), FONT));
                 svg.add(new svglib.Line(x - X_STEP, 80, x - X_STEP, 73, SHAPE_COLOR));
             } else {
-                svg.add(new svglib.Text(x - 16, 90 + 7, date.getFullYear(), FONT));
+                svg.add(new svglib.Text(x - 16, 90 + 7, "" + date.getFullYear(), FONT));
                 svg.add(new svglib.Line(x, 80, x, 73, "gray"));
             }
             lastYear = date.getFullYear();
@@ -63,10 +62,10 @@ function drawSVGdates(datesInBetween, svg, x, lastYear) {
     }
 }
 
-function drawSVGVersions(x, versions, firstDate, lastMajor, lastMinor, verY, svg, TOTAL_SVG_WIDTH) {
+function drawSVGVersions(x: number, versions: Version[], firstDate: Date, lastMajor: number, lastMinor: number, verY: number, svg: svglib.Svg, TOTAL_SVG_WIDTH: number) {
     let startX = x + 5;
     let draw = [];
-    const majorChanged = (x) => {
+    const majorChanged = (x: number) => {
         verY -= 20;
         // svg.add(new svglib.Rectangle(startX + 4, verY + 10, x - 12, 20, COLORS[currentColor % COLORS.length]));
         // svg.add(new svglib.Circle(startX + 3, verY + 20, 10, COLORS[currentColor]));
@@ -101,7 +100,7 @@ function drawSVGVersions(x, versions, firstDate, lastMajor, lastMinor, verY, svg
     majorChanged(TOTAL_SVG_WIDTH)
 }
 
-function toSVG(versions) {
+function toSVG(versions: Version[]) {
     const firstDate = versions[0].date;
     const datesInBetween = between(firstDate, new Date());
     const TOTAL_SVG_WIDTH = datesInBetween.length * X_STEP / 30 + 10;
