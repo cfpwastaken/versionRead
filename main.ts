@@ -1,6 +1,6 @@
 import fetch from "node-fetch";
 import Version from "./Version.js";
-import fs from "fs";
+import * as fs from "fs";
 import * as svglib from "svglib";
 
 const URL: string = "https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter/";
@@ -44,8 +44,8 @@ function drawSVGdates(datesInBetween: Date[], svg: svglib.Svg, x: number, lastYe
         svg.add(new svglib.Circle(x, 70, 3, "white", SHAPE_COLOR));
         if (date.getFullYear() != lastYear) {
             if (i == 0) {
-                svg.add(new svglib.Text(x - 15, 90 + 7, "" + date.getFullYear(), FONT));
-                svg.add(new svglib.Line(x - X_STEP, 80, x - X_STEP, 73, SHAPE_COLOR));
+                svg.add(new svglib.Text(x - 25, 90 + 7, "" + date.getFullYear(), FONT));
+                svg.add(new svglib.Line(x - (X_STEP * 2), 80, x - (X_STEP * 2), 73, SHAPE_COLOR));
             } else {
                 svg.add(new svglib.Text(x - 16, 90 + 7, "" + date.getFullYear(), FONT));
                 svg.add(new svglib.Line(x, 80, x, 73, "gray"));
@@ -63,7 +63,7 @@ function drawSVGdates(datesInBetween: Date[], svg: svglib.Svg, x: number, lastYe
 }
 
 function drawSVGVersions(x: number, versions: Version[], firstDate: Date, lastMajor: number, lastMinor: number, verY: number, svg: svglib.Svg, TOTAL_SVG_WIDTH: number) {
-    let startX = x + 5;
+    let startX = x;
     let draw = [];
     const majorChanged = (x: number) => {
         verY -= 20;
@@ -82,7 +82,7 @@ function drawSVGVersions(x: number, versions: Version[], firstDate: Date, lastMa
     let xOfLastVersion = 0;
     for (const version of versions) {
         const months = (version.date.getMonth() - firstDate.getMonth()) + (version.date.getFullYear() - firstDate.getFullYear()) * 12;
-        const x = months * X_STEP + 15;
+        const x = months * X_STEP + 5;
         if (version.major != lastMajor) {
             majorChanged(xOfLastVersion);
             startX = x;
@@ -112,11 +112,12 @@ function toSVG(versions: Version[]) {
     svg.add(new svglib.Line(10, 70, TOTAL_SVG_WIDTH + 10, 70, SHAPE_COLOR));
 
     let x = X_STEP;
+    svg.add(new svglib.Circle(0, 70, 3, "white", SHAPE_COLOR));
     svg.add(new svglib.Circle(x, 70, 3, "white", SHAPE_COLOR));
 
     x += X_STEP;
     drawSVGdates(datesInBetween, svg, x, lastYear);
-    x = X_STEP;
+    x = 0;
     drawSVGVersions(x, versions, firstDate, lastMajor, lastMinor, verY, svg, TOTAL_SVG_WIDTH);
     return svg.get();
 }
