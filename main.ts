@@ -82,7 +82,7 @@ function drawSVGVersions(x: number, versions: Version[], firstDate: Date, lastMa
     let xOfLastVersion = 0;
     for (const version of versions) {
         const months = (version.date.getMonth() - firstDate.getMonth()) + (version.date.getFullYear() - firstDate.getFullYear()) * 12;
-        const x = months * X_STEP + 5;
+        const x = months * X_STEP + 10;
         if (version.major != lastMajor) {
             majorChanged(xOfLastVersion);
             startX = x;
@@ -112,13 +112,13 @@ function toSVG(versions: Version[]) {
     let lastYear = -1;
     svg.add(new svglib.Line(5, 70, TOTAL_SVG_WIDTH + 10, 70, SHAPE_COLOR));
 
-    let x = X_STEP;
-    svg.add(new svglib.Circle(0, 70, 3, "white", SHAPE_COLOR));
-    svg.add(new svglib.Circle(x, 70, 3, "white", SHAPE_COLOR));
+    let x = X_STEP + 5;
+    svg.add(new svglib.Circle(5, 70, 3, "white", SHAPE_COLOR));
+    svg.add(new svglib.Circle(15, 70, 3, "white", SHAPE_COLOR));
 
-    x += X_STEP;
+    x = X_STEP + 15;
     drawSVGdates(datesInBetween, svg, x, lastYear);
-    x = 0;
+    x = 10;
     drawSVGVersions(x, versions, firstDate, lastMajor, lastMinor, verY, svg, TOTAL_SVG_WIDTH);
     return svg.get();
 }
