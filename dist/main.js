@@ -13,7 +13,7 @@ import * as fs from "fs";
 import * as svglib from "svglib";
 const URL = "https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter/";
 const COLORS = ["firebrick", "forestgreen"];
-const FONT = "Arial";
+const FONT = "Pt Sans";
 const X_STEP = 10;
 const SVG_HEIGHT = 100;
 const SHAPE_COLOR = "gray";
@@ -94,7 +94,10 @@ function drawSVGVersions(x, versions, firstDate, lastMajor, lastMinor, verY, svg
         xOfLastVersion = x;
         if (version.minor != lastMinor) {
             draw.push(new svglib.Circle(x + 5, verY, 5, "white", SHAPE_COLOR));
-            svg.add(new svglib.Text(x - X_STEP + 5, verY - 15, version.major + "." + version.minor, FONT));
+            if (version.minor == 1 && version.major == 1)
+                svg.add(new svglib.Text(x - X_STEP + 10, verY - 15, version.major + "." + version.minor, FONT));
+            else
+                svg.add(new svglib.Text(x - X_STEP + 5, verY - 15, version.major + "." + version.minor, FONT));
         }
         else {
             draw.push(new svglib.Circle(x + 5, verY, 2, "white", SHAPE_COLOR));
@@ -113,7 +116,7 @@ function toSVG(versions) {
     let lastMajor = 1;
     let lastMinor = -1;
     let lastYear = -1;
-    svg.add(new svglib.Line(10, 70, TOTAL_SVG_WIDTH + 10, 70, SHAPE_COLOR));
+    svg.add(new svglib.Line(5, 70, TOTAL_SVG_WIDTH + 10, 70, SHAPE_COLOR));
     let x = X_STEP;
     svg.add(new svglib.Circle(0, 70, 3, "white", SHAPE_COLOR));
     svg.add(new svglib.Circle(x, 70, 3, "white", SHAPE_COLOR));
